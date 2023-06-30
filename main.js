@@ -112,9 +112,26 @@ function redrawCurve() {
 
     context.beginPath();
     context.moveTo(startPoint.x, startPoint.y);
+
+    const projCurvePoint = calculateProjection(
+      curvePoint.x,
+      curvePoint.y,
+      -endPoint.y + startPoint.y,
+      endPoint.x - startPoint.x,
+      endPoint.x,
+      endPoint.y
+    );
+
+    const middlePoint = {
+      x: (startPoint.x + endPoint.x) / 2,
+      y: (startPoint.y + endPoint.y) / 2,
+    };
+
     context.quadraticCurveTo(
-      curvePoint.x * 2 - (startPoint.x + endPoint.x) / 2,
-      curvePoint.y * 2 - (startPoint.y + endPoint.y) / 2,
+      projCurvePoint.x + 2 * (curvePoint.x - projCurvePoint.x),
+      projCurvePoint.y + 2 * (curvePoint.y - projCurvePoint.y),
+      // middlePoint.x + 2 * (curvePoint.x - middlePoint.x),
+      // middlePoint.y + 2 * (curvePoint.y - middlePoint.y),
       endPoint.x,
       endPoint.y
     );
@@ -126,21 +143,6 @@ function redrawCurve() {
     drawSquare(endPoint);
     drawCurvePoint(curvePoint);
   }
-  // context.beginPath();
-  // context.moveTo(startPoint.x, startPoint.y);
-  // context.quadraticCurveTo(
-  //   (curvePoint.x * 2) - (startPoint.x + endPoint.x) / 2,
-  //   (curvePoint.y * 2) - (startPoint.y + endPoint.y) / 2,
-  //   endPoint.x,
-  //   endPoint.y
-  // );
-  // context.strokeStyle = 'red'; // Customize the curve color
-  // context.lineWidth = 2; // Customize the curve width
-  // context.stroke();
-
-  // drawSquare(startPoint);
-  // drawSquare(endPoint);
-  // drawCurvePoint(curvePoint);
 }
 
 function drawSquare(point) {
@@ -192,4 +194,19 @@ function drawCurvePoint(point) {
   context.strokeStyle = "red"; // Customize the curve point border color
   context.lineWidth = 1;
   context.stroke();
+}
+
+// Function to calculate the projection of a point (x, y) on a line defined by normal vector (A, B) and a point that goes through (pointX, pointY)
+function calculateProjection(x, y, A, B, pointX, pointY) {
+  // Calculate the squared length of the normal vector
+  const normalVectorLengthSquared = A * A + B * B;
+  const C = -(A * pointX + B * pointY);
+
+  // Calculate the projection of the point on the line
+  const projectedPoint = {
+    x: (B * (B * x - A * y) - A * C) / normalVectorLengthSquared,
+    y: (A * (-B * x + A * y) - B * C) / normalVectorLengthSquared,
+  };
+
+  return projectedPoint;
 }
